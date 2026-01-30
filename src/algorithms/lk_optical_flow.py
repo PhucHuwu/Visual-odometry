@@ -6,8 +6,8 @@ Sparse optical flow tracking sử dụng Lucas-Kanade method.
 import cv2
 import numpy as np
 from typing import Tuple, List, Optional
-from .base_algorithm import BaseAlgorithm
-from ..utils.logger import get_logger
+from algorithms.base_algorithm import BaseAlgorithm
+from utils.logger import get_logger
 
 logger = get_logger()
 

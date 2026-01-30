@@ -6,8 +6,8 @@ Features from Accelerated Segment Test (FAST) corner detection.
 import cv2
 import numpy as np
 from typing import Tuple, List, Optional
-from .base_algorithm import BaseAlgorithm
-from ..utils.logger import get_logger
+from algorithms.base_algorithm import BaseAlgorithm
+from utils.logger import get_logger
 
 logger = get_logger()
 

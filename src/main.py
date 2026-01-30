@@ -7,6 +7,7 @@ from utils.logger import setup_logger
 from utils.config_loader import ConfigLoader
 from core.vo_pipeline import VOPipeline
 from core.camera import CameraInput
+from visualization.visualizer import Visualizer
 import argparse
 import sys
 import time
@@ -65,6 +66,12 @@ def parse_args():
         help='Log level (default: INFO)'
     )
 
+    parser.add_argument(
+        '--no-display',
+        action='store_true',
+        help='Tắt hiển thị camera window (chỉ process, không show)'
+    )
+
     return parser.parse_args()
 
 
@@ -109,6 +116,12 @@ def main():
         # Initialize VO pipeline
         vo = VOPipeline(config)
 
+        # Initialize visualizer
+        visualizer = None
+        if not args.no_display:
+            visualizer = Visualizer(window_name=f"VO - {args.algorithm.upper()}")
+            logger.info("Visualization enabled - cửa sổ camera sẽ hiện")
+
         logger.info(f"Bắt đầu xử lý video với algorithm: {args.algorithm.upper()}")
         logger.info("Nhấn 'q' để thoát")
 
@@ -139,6 +152,29 @@ def main():
             avg_time = sum(frame_times) / len(frame_times)
             fps = 1.0 / avg_time if avg_time > 0 else 0.0
 
+            # Visualize nếu enabled
+            if visualizer is not None:
+                # Get stats
+                stats = vo.get_stats()
+                stats['fps'] = fps
+                stats['keypoints'] = len(vo.prev_keypoints) if vo.prev_keypoints else 0
+                stats['algorithm'] = args.algorithm.upper()
+
+                # Draw frame
+                display_frame = frame.copy()
+
+                # Draw keypoints nếu có
+                if vo.prev_keypoints:
+                    display_frame = visualizer.draw_keypoints(display_frame, vo.prev_keypoints)
+
+                # Add stats overlay
+                display_frame = visualizer.add_stats(display_frame, stats)
+
+                # Show
+                if not visualizer.show(display_frame, wait_ms=1):
+                    logger.info("User nhấn 'q' để thoát")
+                    break
+
             # Log progress định kỳ
             if camera.get_frame_count() % 10 == 0:
                 stats = vo.get_stats()
@@ -146,9 +182,6 @@ def main():
                             f"FPS={fps:.1f}, "
                             f"Trajectory={stats['trajectory_length']} poses, "
                             f"Position={stats['current_position']}")
-
-            # Kiểm tra user input (đơn giản hóa - không có visualization)
-            # Trong production sẽ dùng cv2.imshow và cv2.waitKey
 
         # Lưu trajectory
         output_path = Path(args.output)
@@ -176,6 +209,8 @@ def main():
 
     finally:
         # Cleanup
+        if 'visualizer' in locals() and visualizer is not None:
+            visualizer.close()
         if 'camera' in locals():
             camera.release()
 

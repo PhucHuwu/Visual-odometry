@@ -6,7 +6,7 @@ Xử lý input từ webcam hoặc video file.
 import cv2
 import numpy as np
 from typing import Optional, Tuple
-from ..utils.logger import get_logger
+from utils.logger import get_logger
 
 logger = get_logger()
 
@@ -48,6 +48,23 @@ class CameraInput:
 
         if not self.cap.isOpened():
             raise RuntimeError(f"Không thể mở video source: {self.source}")
+
+        # Camera warmup - đặc biệt quan trọng cho iPhone Continuity Camera
+        import time
+        logger.info("Đang khởi động camera, vui lòng đợi...")
+        time.sleep(2)  # Đợi 2 giây cho camera warmup
+
+        # Đọc và discard vài frames đầu tiên (thường bị corrupt)
+        for _ in range(5):
+            self.cap.read()
+
+        # Verify có thể đọc frame
+        ret, test_frame = self.cap.read()
+        if not ret or test_frame is None:
+            raise RuntimeError(f"Camera mở được nhưng không đọc được frame. "
+                               f"Vui lòng kiểm tra Continuity Camera settings.")
+
+        logger.info(f"Camera warmup hoàn tất!")
 
         # Lấy thông tin video
         self.original_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))

@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 from pathlib import Path
 from typing import Tuple, Optional, Dict, Any
-from ..utils.logger import get_logger
+from utils.logger import get_logger
 
 logger = get_logger()
 

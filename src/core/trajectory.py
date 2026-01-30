@@ -5,7 +5,7 @@ Quản lý và tích lũy trajectory của camera.
 
 import numpy as np
 from typing import List, Tuple, Optional
-from ..utils.logger import get_logger
+from utils.logger import get_logger
 
 logger = get_logger()
 
