@@ -63,7 +63,14 @@ class VOPipeline:
         self.prev_keypoints: Optional[list] = None
         self.prev_descriptors: Optional[np.ndarray] = None
 
+        # Keyframe selection state
+        self.last_keyframe_R = np.eye(3)  # Last keyframe rotation
+        self.last_keyframe_t = np.zeros(3)  # Last keyframe translation
+        self.keyframe_min_rotation = 0.05  # Min rotation (radians) ~2.8 degrees
+        self.keyframe_min_translation = 0.1  # Min translation (normalized)
+
         self.frame_count = 0
+        self.keyframe_count = 0  # Số keyframes được chọn
         self.total_keypoints = 0
         self.total_matches = 0
 
@@ -188,11 +195,26 @@ class VOPipeline:
         scale = self.scale_estimator.estimate(t)
         t_scaled = self.scale_estimator.apply_scale(t, scale)
 
-        # Update trajectory
-        self.trajectory.update(R, t_scaled)
+        # Keyframe selection: chỉ update trajectory nếu có đủ motion
+        if not self._is_keyframe(R, t_scaled):
+            logger.debug(f"Frame {self.frame_count}: Skipped (insufficient motion)")
+            # Update previous state nhưng KHÔNG update trajectory
+            self.prev_image = gray
+            if not isinstance(self.algorithm, LucasKanadeOpticalFlow):
+                self.prev_keypoints = curr_keypoints
+                self.prev_descriptors = curr_descriptors
+            return False
 
-        logger.debug(f"Frame {self.frame_count}: Processed successfully, "
-                     f"{num_inliers} inliers, trajectory_length={self.trajectory.get_trajectory_length()}")
+        # Update trajectory (chỉ với keyframes)
+        self.trajectory.update(R, t_scaled)
+        self.keyframe_count += 1
+
+        # Update last keyframe state
+        self.last_keyframe_R = R.copy()
+        self.last_keyframe_t = t_scaled.copy()
+
+        logger.debug(f"Frame {self.frame_count}: Keyframe #{self.keyframe_count}, "
+                     f"{num_inliers} inliers, trajectory={self.trajectory.get_trajectory_length()}")
 
         # Update previous state
         self.prev_image = gray
@@ -206,6 +228,32 @@ class VOPipeline:
                 self.prev_keypoints, _ = self.algorithm.detect(gray)
 
         return True
+
+    def _is_keyframe(self, R: np.ndarray, t: np.ndarray) -> bool:
+        """
+        Kiểm tra frame có đủ motion để trở thành keyframe.
+
+        Args:
+            R: Current rotation matrix
+            t: Current translation vector (scaled)
+
+        Returns:
+            True nếu frame nên được chọn làm keyframe
+        """
+        R_diff = R @ self.last_keyframe_R.T
+        trace = np.trace(R_diff)
+        # Clamp trace to valid range [-1, 3]
+        trace = np.clip(trace, -1, 3)
+        rotation_angle = np.arccos((trace - 1) / 2)
+
+        # Tính translation difference
+        t_diff = np.linalg.norm(t - self.last_keyframe_t)
+
+        # Accept keyframe nếu vượt threshold
+        is_kf = (rotation_angle > self.keyframe_min_rotation or
+                 t_diff > self.keyframe_min_translation)
+
+        return is_kf
 
     def get_trajectory(self) -> np.ndarray:
         """Lấy trajectory array"""

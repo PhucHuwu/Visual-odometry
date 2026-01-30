@@ -35,7 +35,7 @@ lucas_kanade:
 
 # Feature Matching (cho ORB, SIFT)
 matching:
-    ratio_test: 0.7 # Lowe's ratio test threshold
-    min_matches: 10 # Minimum matches để estimate motion
-    ransac_threshold: 1.0 # RANSAC threshold (pixels)
+    ratio_test: 0.75 # Lowe's ratio test threshold - INCREASED from 0.7 for more strict filtering
+    min_matches: 15 # Minimum matches để estimate motion - INCREASED from 10
+    ransac_threshold: 3.0 # RANSAC threshold (pixels) - INCREASED from 1.0
     ransac_confidence: 0.999 # RANSAC confidence

@@ -113,6 +113,42 @@ def plot_trajectory_2d(trajectory):
     return fig
 
 
+def plot_top_view(trajectory):
+    """Plot top view only (XY plane - nhìn từ trên xuống)"""
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+
+    x = trajectory[:, 0]
+    y = trajectory[:, 1]
+
+    # Plot trajectory
+    ax.plot(x, y, 'b-', linewidth=2, label='Camera Path')
+
+    # Plot start and end
+    ax.scatter(x[0], y[0], c='green', marker='o', s=150, label='Start', zorder=5)
+    ax.scatter(x[-1], y[-1], c='red', marker='s', s=150, label='End', zorder=5)
+
+    # Labels
+    ax.set_xlabel('X (m)', fontsize=14)
+    ax.set_ylabel('Y (m)', fontsize=14)
+    ax.set_title('Top View - Camera Trajectory (Bird\'s Eye View)', fontsize=16, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=12)
+    ax.axis('equal')
+
+    # Stats
+    stats_text = f"Total poses: {len(trajectory)}\n"
+    stats_text += f"X range: [{x.min():.2f}, {x.max():.2f}] m\n"
+    stats_text += f"Y range: [{y.min():.2f}, {y.max():.2f}] m\n"
+    stats_text += f"Horizontal distance: {np.linalg.norm([x[-1] - x[0], y[-1] - y[0]]):.2f} m"
+
+    ax.text(0.02, 0.98, stats_text, transform=ax.transAxes,
+            fontsize=11, verticalalignment='top', family='monospace',
+            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.7))
+
+    plt.tight_layout()
+    return fig
+
+
 def main():
     parser = argparse.ArgumentParser(description='Visualize Visual Odometry Trajectory')
     parser.add_argument(
@@ -127,6 +163,12 @@ def main():
         dest='plot_2d',
         help='Hiển thị 2D views thay vì 3D'
     )
+    parser.add_argument(
+        '--top-view',
+        action='store_true',
+        dest='top_view',
+        help='Hiển thị top view only (XY plane - nhìn từ trên xuống, bỏ qua Z)'
+    )
 
     args = parser.parse_args()
 
@@ -136,7 +178,10 @@ def main():
     print(f"Loaded {len(trajectory)} poses")
 
     # Plot
-    if args.plot_2d:
+    if args.top_view:
+        print("Plotting top view (XY plane)...")
+        fig = plot_top_view(trajectory)
+    elif args.plot_2d:
         print("Plotting 2D views...")
         fig = plot_trajectory_2d(trajectory)
     else:
