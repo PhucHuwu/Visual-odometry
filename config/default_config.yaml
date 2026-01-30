@@ -1,0 +1,49 @@
+# Default Runtime Configuration
+
+# Video Source
+video:
+    source: 0 # 0 = webcam, hoặc path tới video file
+    width: 640 # Resize width (null = giữ nguyên)
+    height: 480 # Resize height (null = giữ nguyên)
+    fps: 30 # Target FPS (null = camera default)
+    skip_frames: 0 # Skip N frames (0 = process all)
+
+# Algorithm Selection
+algorithm:
+    type: "orb" # fast, orb, sift, lucas_kanade
+    config_file: "config/algorithm_config.yaml"
+
+# Camera Calibration
+camera:
+    calibration_file: "config/camera_params.yaml"
+    use_calibration: true # true = undistort images
+
+# Visualization
+visualization:
+    show_video: true # Hiển thị video với keypoints
+    show_trajectory_3d: true # Hiển thị trajectory 3D
+    show_stats: true # Hiển thị FPS, số keypoints, etc.
+    trajectory_update_rate: 5 # Update 3D plot mỗi N frames
+    trajectory_history: 1000 # Số poses lưu trữ (0 = unlimited)
+
+# Performance
+performance:
+    use_multithreading: true # Enable multi-threading
+    num_threads: 2 # Số threads (0 = auto)
+    profile: false # Enable profiling (cProfile)
+
+# Logging
+logging:
+    level: "INFO" # DEBUG, INFO, WARNING, ERROR
+    file: "logs/vo.log" # Log file path
+    console: true # Log to console
+    rotation: true # Enable log rotation
+    max_bytes: 10485760 # 10MB per file
+    backup_count: 3 # Keep 3 backup files
+
+# Output
+output:
+    save_trajectory: true # Save trajectory to file
+    trajectory_file: "output/trajectory.txt"
+    save_stats: true # Save statistics
+    stats_file: "output/stats.csv"

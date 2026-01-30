@@ -1,0 +1,41 @@
+# Algorithm-specific Configuration
+
+# FAST Feature Detector
+fast:
+    threshold: 20 # Corner detection threshold (lower = more keypoints)
+    nonmaxSuppression: true # Non-maximum suppression
+    type: 2 # TYPE_9_16
+
+# ORB Feature Detector
+orb:
+    nfeatures: 500 # Maximum số keypoints
+    scaleFactor: 1.2 # Pyramid decimation ratio
+    nlevels: 8 # Số pyramid levels
+    edgeThreshold: 31 # Size of border (không detect ở đây)
+    firstLevel: 0 # Level của pyramid đầu tiên
+    WTA_K: 2 # Số points cho WTA
+    patchSize: 31 # Size của patch cho oriented BRIEF
+
+# SIFT Feature Detector
+sift:
+    nfeatures: 0 # 0 = không giới hạn
+    nOctaveLayers: 3 # Số layers trong mỗi octave
+    contrastThreshold: 0.04 # Threshold cho low contrast
+    edgeThreshold: 10 # Threshold cho edge-like features
+    sigma: 1.6 # Sigma của Gaussian
+
+# Lucas-Kanade Optical Flow
+lucas_kanade:
+    winSize: [21, 21] # Size của search window
+    maxLevel: 3 # Pyramid levels (0 = no pyramid)
+    criteria:
+        type: 3 # COUNT + EPS
+        maxCount: 30 # Max iterations
+        epsilon: 0.01 # Min accuracy
+
+# Feature Matching (cho ORB, SIFT)
+matching:
+    ratio_test: 0.7 # Lowe's ratio test threshold
+    min_matches: 10 # Minimum matches để estimate motion
+    ransac_threshold: 1.0 # RANSAC threshold (pixels)
+    ransac_confidence: 0.999 # RANSAC confidence

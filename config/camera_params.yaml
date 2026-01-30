@@ -1,0 +1,27 @@
+# Camera Calibration Parameters
+# Cần calibrate camera trước khi sử dụng VO
+# Chạy: python scripts/calibrate_camera.py để tạo file này
+
+camera_matrix:
+    fx: 718.856 # Focal length x (pixels)
+    fy: 718.856 # Focal length y (pixels)
+    cx: 607.1928 # Principal point x
+    cy: 185.2157 # Principal point y
+
+distortion_coefficients:
+    k1: -0.0
+    k2: 0.0
+    p1: 0.0
+    p2: 0.0
+    k3: 0.0
+
+# Image dimensions (width x height)
+image_size:
+    width: 1241
+    height: 376
+
+# Notes:
+# - fx, fy: Focal lengths in pixels
+# - cx, cy: Principal point (image center)
+# - k1, k2, k3: Radial distortion coefficients
+# - p1, p2: Tangential distortion coefficients
